@@ -3,8 +3,8 @@
 #TO-DO
 
 1 - Define Types of Malware (RootKit/XSS/Overflow)
-	1 - Virus
-	2. Worms
+	- Virus
+	- Worms
 	- Trojans
 	- Ransomware
 	- Adware
