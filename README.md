@@ -33,5 +33,6 @@ ____                    _              _
   	- RootKit - https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/exploring-an-experimental-windows-kernel-rootkit-in-rust/
 	- RootKit - https://github.com/memN0ps/eagle-rs
  	- Ransomware - https://github.com/cdong1012/Rust-Ransomware
+  	- Guide - https://github.com/Whitecat18/Rust-for-Malware-Development
 
 3 - Interface / API
