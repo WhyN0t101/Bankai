@@ -1,6 +1,9 @@
 # RustMalware
 
 #TO-DO
-1 - Define Types of Malware
-2 - Create a CLI Option 
-3 - Interface 
+
+1 - Define Types of Malware (RootKit/XSS/Overflow)
+
+2 - Create a CLI Option (Various options to choose from like option 3 - Overflow -> Choose PID
+
+3 - Interface / API
