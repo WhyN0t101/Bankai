@@ -34,5 +34,6 @@ ____                    _              _
 	- RootKit - https://github.com/memN0ps/eagle-rs
  	- Ransomware - https://github.com/cdong1012/Rust-Ransomware
   	- Guide - https://github.com/Whitecat18/Rust-for-Malware-Development
+   	- Guide - https://github.com/skerkour/black-hat-rust
 
 3 - Interface / API
