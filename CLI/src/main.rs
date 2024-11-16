@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 use std::io::{self, Write};  // For input and output
+mod reverseShell;
 
 #[derive(Parser)]
 #[command(name = "vulnerability_tester")]
@@ -82,7 +83,9 @@ fn test_buffer_overflow() {
 
 fn simulate_reverse_shell() {
     println!("Simulating reverse shell attack...");
-    // Add the logic for reverse shell simulation here
+    if let Err(e) = reverseShell::start_reverse_shell() {
+        println!("Error starting reverse shell: {:?}", e);
+    }
 }
 
 fn test_ransomware() {
