@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 use std::io::{self, Write}; // For input and output
 mod overflow;
 mod reverseShellCon;
+use std::process::Command;
 
 #[derive(Parser)]
 #[command(name = "vulnerability_tester")]
@@ -33,6 +34,7 @@ fn main() {
 
     if cli.command.is_none() {
         loop {
+            clear_terminal();
             println!(" ____                    _              _ ");
             println!("| __ )    __ _   _ __   | | __   __ _  (_)");
             println!("|  _ \\   / _` | | '_ \\  | |/ /  / _` | | |");
@@ -98,4 +100,17 @@ fn test_ransomware() {
 fn simulate_rootkit() {
     println!("Simulating rootkit attack...");
     // Add the logic for rootkit simulation here
+}
+
+fn clear_terminal() {
+    #[cfg(target_os = "windows")]
+    Command::new("cmd")
+        .args(&["/C", "cls"])
+        .output()
+        .expect("Failed to clear terminal");
+
+    #[cfg(target_os = "unix")]
+    Command::new("clear")
+        .output()
+        .expect("Failed to clear terminal");
 }
