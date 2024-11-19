@@ -1,6 +1,5 @@
 use clap::{Parser, Subcommand};
 use std::io::{self, Write}; // For input and output
-mod reverseShell;
 mod overflow;
 mod reverseShellCon;
 
@@ -84,11 +83,12 @@ fn test_buffer_overflow() {
 
 fn simulate_reverse_shell() {
     println!("Simulating reverse shell attack...");
-    match reverseShellCon::main() {
+    match reverseShellCon::connect_reverse_shell() {
         Ok(_) => println!("Reverse shell connected successfully"),
         Err(e) => eprintln!("Error: {}", e),
     }
 }
+
 
 fn test_ransomware() {
     println!("Testing ransomware behavior...");
