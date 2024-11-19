@@ -14,7 +14,8 @@ pub fn main() ->  Result<(), io::Error> {
     let port = port.trim().parse::<u16>().expect("Invalid port number");
 
     let addr = format!("{}:{}", ip, port);
-    TcpStream::connect(&addr)?;
+    let mut stream = TcpStream::connect(&addr)?;
+
     println!("Connected to {}!", addr);
 
     loop {
