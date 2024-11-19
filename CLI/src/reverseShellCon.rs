@@ -16,5 +16,20 @@ pub fn main() ->  Result<(), io::Error> {
     let addr = format!("{}:{}", ip, port);
     TcpStream::connect(&addr)?;
     println!("Connected to {}!", addr);
+
+    loop {
+     println!("Enter command:");
+     let mut command = String::new();
+     io::stdin().read_line(&mut command).expect("Failed to read command");
+
+     if command.trim() == "exit" {
+         break;
+     }
+
+     stream.write_all(command.as_bytes())?;
+     let mut response = String::new();
+     stream.read_to_string(&mut response)?;
+     println!("{}", response);
+ }
     Ok(())
 }
