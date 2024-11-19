@@ -5,3 +5,7 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
+
+[modules]
+buffer_overflow = "src/buffer_overflow.rs"
+

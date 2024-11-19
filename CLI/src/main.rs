@@ -1,10 +1,11 @@
 use clap::{Parser, Subcommand};
-use std::io::{self, Write};  // For input and output
+use std::io::{self, Write}; // For input and output
 mod reverseShell;
+mod overflow;
 
 #[derive(Parser)]
 #[command(name = "vulnerability_tester")]
-#[command(author = "Your Name")]
+#[command(author = "Diogo Andrade & Tiago Pereira")]
 #[command(version = "1.0")]
 #[command(about = "A CLI tool to test various vulnerabilities", long_about = None)]
 struct Cli {
@@ -30,10 +31,8 @@ enum Commands {
 fn main() {
     let cli = Cli::parse();
 
-    // Interactive CLI loop
     if cli.command.is_none() {
         loop {
-            // Print the ASCII Banner
             println!(" ____                    _              _ ");
             println!("| __ )    __ _   _ __   | | __   __ _  (_)");
             println!("|  _ \\   / _` | | '_ \\  | |/ /  / _` | | |");
@@ -48,7 +47,7 @@ fn main() {
             println!();
 
             print!("Enter the number of your choice: ");
-            io::stdout().flush().unwrap();  // Ensure the prompt shows immediately
+            io::stdout().flush().unwrap(); // Ensure the prompt shows immediately
 
             let mut choice = String::new();
             io::stdin().read_line(&mut choice).unwrap();
@@ -78,7 +77,8 @@ fn main() {
 
 fn test_buffer_overflow() {
     println!("Testing buffer overflow vulnerability...");
-    // Add the logic for buffer overflow test here
+    overflow::test(); // Call the function from the overflow module
+
 }
 
 fn simulate_reverse_shell() {
@@ -97,4 +97,3 @@ fn simulate_rootkit() {
     println!("Simulating rootkit attack...");
     // Add the logic for rootkit simulation here
 }
-
