@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
 winapi = { version = "0.3", features = ["libloaderapi"] }
+tokio = { version = "1", features = ["full"] }
 
 
 [modules]

