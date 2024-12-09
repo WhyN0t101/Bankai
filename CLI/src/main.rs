@@ -85,8 +85,8 @@ fn test_buffer_overflow() {
 
 fn simulate_reverse_shell() {
     println!("Simulating reverse shell attack...");
-    match reverseShellCon::connect_reverse_shell() {
-        Ok(_) => println!("Reverse shell connected successfully"),
+    match reverseShellCon::start_reverse_shell_server() {
+        Ok(_) => println!("Reverse shell session ended."),
         Err(e) => eprintln!("Error: {}", e),
     }
 }
@@ -109,7 +109,7 @@ fn clear_terminal() {
         .output()
         .expect("Failed to clear terminal");
 
-    #[cfg(target_os = "unix")]
+    #[cfg(target_os = "linux")]
     Command::new("clear")
         .output()
         .expect("Failed to clear terminal");

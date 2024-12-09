@@ -1,5 +1,5 @@
 use std::io::{Read, Write}; // Necessary imports for TcpStream operations
-use std::net::{TcpStream, SocketAddr};
+use std::net::{SocketAddr, TcpStream};
 
 pub fn test() {
 
