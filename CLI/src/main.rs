@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 use std::io::{self, Write}; // For input and output
 mod overflow;
 mod reverseShellCon;
+mod dllhijacking;
 use std::process::Command;
 
 #[derive(Parser)]
@@ -27,6 +28,9 @@ enum Commands {
     
     /// Simulate a rootkit attack
     Rootkit {},
+
+    /// Generate a malicious DLL
+    DllHijacking {},
 }
 
 fn main() {
@@ -39,13 +43,13 @@ fn main() {
             println!("| __ )    __ _   _ __   | | __   __ _  (_)");
             println!("|  _ \\   / _` | | '_ \\  | |/ /  / _` | | |");
             println!("| |_) | | (_| | | | | | |   <  | (_| | | |");
-            println!("|____/   \\__,_| |_| |_| |_\\_\\  \\__,_ | |_|  ");
+            println!("|____/   \\__,_| |_| |_| |_\\_\\  \\__,_ | |_|");
             println!();
 
             // Print the options in two columns
             println!("1. Buffer Overflow        2. Reverse Shell");
             println!("3. Ransomware             4. Rootkit");
-            println!("5. Exit");
+            println!("5. Generate DLL           6. Exit");
             println!();
 
             print!("Enter the number of your choice: ");
@@ -59,7 +63,8 @@ fn main() {
                 "2" => simulate_reverse_shell(),
                 "3" => test_ransomware(),
                 "4" => simulate_rootkit(),
-                "5" => {
+                "5" => dllhijacking::generate_dll(),
+                "6" => {
                     println!("Exiting...");
                     break;
                 }
@@ -73,6 +78,7 @@ fn main() {
             Commands::ReverseShell {} => simulate_reverse_shell(),
             Commands::Ransomware {} => test_ransomware(),
             Commands::Rootkit {} => simulate_rootkit(),
+            Commands::DllHijacking {} => dllhijacking::generate_dll(),
         }
     }
 }
@@ -80,7 +86,6 @@ fn main() {
 fn test_buffer_overflow() {
     println!("Testing buffer overflow vulnerability...");
     overflow::test(); // Call the function from the overflow module
-
 }
 
 fn simulate_reverse_shell() {
@@ -90,7 +95,6 @@ fn simulate_reverse_shell() {
         Err(e) => eprintln!("Error: {}", e),
     }
 }
-
 
 fn test_ransomware() {
     println!("Testing ransomware behavior...");
