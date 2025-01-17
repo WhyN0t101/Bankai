@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 use std::io::{self, Write}; // For input and output
 mod overflow;
 mod reverseShellCon;
-mod dllhijacking;
+mod dllhijackingC;
 use std::process::Command;
 
 #[derive(Parser)]
@@ -63,7 +63,10 @@ fn main() {
                 "2" => simulate_reverse_shell(),
                 "3" => test_ransomware(),
                 "4" => simulate_rootkit(),
-                "5" => dllhijacking::generate_dll(),
+                "5" => match dllhijackingC::compile_c_to_dll() {
+			Ok(_) => println!("DLL compiled successfully."),
+			Err(e) => eprintln!("Compilation error: {}", e),
+		       },
                 "6" => {
                     println!("Exiting...");
                     break;
@@ -78,7 +81,11 @@ fn main() {
             Commands::ReverseShell {} => simulate_reverse_shell(),
             Commands::Ransomware {} => test_ransomware(),
             Commands::Rootkit {} => simulate_rootkit(),
-            Commands::DllHijacking {} => dllhijacking::generate_dll(),
+            Commands::DllHijacking {} => {
+                if let Err(e) = dllhijackingC::compile_c_to_dll() {
+                    eprintln!("Compilation error: {}", e);
+                }
+            },
         }
     }
 }
