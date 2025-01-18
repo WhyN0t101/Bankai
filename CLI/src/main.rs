@@ -95,7 +95,7 @@ fn main() {
 
 fn test_buffer_overflow() {
     println!("Testing buffer overflow vulnerability...");
-    overflow::test(); // Call the function from the overflow module
+    overflow::overflow_server(); // Call the function from the overflow module
 }
 
 
