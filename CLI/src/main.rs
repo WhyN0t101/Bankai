@@ -5,6 +5,8 @@ mod reverse_shell;
 mod dll_hijacking_c;
 mod phishing;
 mod port_scanner;
+mod decrypt;
+
 use std::process::Command;
 
 #[derive(Parser)]
@@ -33,6 +35,9 @@ enum Commands {
 
     /// Generate a malicious DLL
     DllHijacking {},
+
+    /// Decrypt the Documents folder
+    DecryptDocuments {},
 }
 
 fn main() {
@@ -42,17 +47,18 @@ fn main() {
         loop {
             clear_terminal();
             println!(" ____                    _              _ ");
-            println!("| __ )    __ _   _ __   | | __   __ _  (_)");
-            println!("|  _ \\   / _` | | '_ \\  | |/ /  / _` | | |");
-            println!("| |_) | | (_| | | | | | |   <  | (_| | | |");
-            println!("|____/   \\__,_| |_| |_| |_\\_\\  \\__,_ | |_|");
+            println!("| __ )    __ _   _ __   | | __   __ _  (_) ");
+            println!("|  _ \\   / _` | | '_ \\  | |/ /  / _` | | | ");
+            println!("| |_) | | (_| | | | | | |   <  | (_| | | | ");
+            println!("|____/   \\__,_| |_| |_| |_\\_\\  \\__,_ | |_| ");
             println!();
 
             // Print the options in two columns
             println!("1. Buffer Overflow        2. Reverse Shell");
             println!("3. Ransomware             4. Rootkit");
             println!("5. Generate DLL           6. Phishing");
-            println!("7. Port Scanner              8. Exit");
+            println!("7. Port Scanner           8. Decrypt Documents");
+            println!("9. Exit");
             println!();
 
             print!("Enter the number of your choice: ");
@@ -67,12 +73,13 @@ fn main() {
                 "3" => test_ransomware(),
                 "4" => simulate_rootkit(),
                 "5" => match dll_hijacking_c::compile_c_to_dll() {
-			Ok(_) => println!("DLL compiled successfully."),
-			Err(e) => eprintln!("Compilation error: {}", e),
-		       },
-		"6" => phishing::generate_email(),
-        "7" => port_scanner::port_scanner(),
-                "8" => {
+                    Ok(_) => println!("DLL compiled successfully."),
+                    Err(e) => eprintln!("Compilation error: {}", e),
+                },
+                "6" => phishing::generate_email(),
+                "7" => port_scanner::port_scanner(),
+                "8" => decrypt::decrypt_documents_cli(),
+                "9" => {
                     println!("Exiting...");
                     break;
                 }
@@ -91,6 +98,7 @@ fn main() {
                     eprintln!("Compilation error: {}", e);
                 }
             },
+            Commands::DecryptDocuments {} => decrypt::decrypt_documents_cli(),
         }
     }
 }
@@ -99,9 +107,6 @@ fn test_buffer_overflow() {
     println!("Testing buffer overflow vulnerability...");
     overflow::overflow_server(); // Call the function from the overflow module
 }
-
-
-
 
 fn test_ransomware() {
     println!("Testing ransomware behavior...");
