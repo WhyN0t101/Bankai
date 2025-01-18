@@ -28,9 +28,7 @@ enum Commands {
     /// Simulate a reverse shell attack
     ReverseShell {},
     
-    /// Test for ransomware behavior
-    Ransomware {},
-    
+    /// Test for ransomware behavior    
     /// Simulate a rootkit attack
     Rootkit {},
 
@@ -55,10 +53,9 @@ fn main() {
 
             // Print the options in two columns
             println!("1. Buffer Overflow        2. Reverse Shell");
-            println!("3. Ransomware             4. Rootkit");
+            println!("3. Port Scanner             4. Rootkit (TODO)");
             println!("5. Generate DLL           6. Phishing");
-            println!("7. Decrypt                8. Port Scanner");
-            println!("9. Something              10. Exit");
+            println!("7. Decrypt                8. Exit");
             println!();
 
             print!("Enter the number of your choice: ");
@@ -70,16 +67,15 @@ fn main() {
             match choice.trim() {
                 "1" => test_buffer_overflow(),
                 "2" => reverse_shell::simulate_reverse_shell(),
-                "3" => test_ransomware(),
+                "3" => port_scanner::port_scanner(),
                 "4" => simulate_rootkit(),
                 "5" => match dll_hijacking_c::compile_c_to_dll() {
                     Ok(_) => println!("DLL compiled successfully."),
                     Err(e) => eprintln!("Compilation error: {}", e),
                 },
-                "6" => phishing::generate_email(),
-                "7" => port_scanner::port_scanner(),
-                "8" => decrypt::decrypt_documents_cli(),
-                "9" => {
+                "6" => phishing::generate_email(), 
+                "7" => decrypt::decrypt_documents_cli(),
+                "8" => {
                     println!("Exiting...");
                     break;
                 }
@@ -91,7 +87,6 @@ fn main() {
         match cli.command.unwrap() {
             Commands::BufferOverflow {} => test_buffer_overflow(),
             Commands::ReverseShell {} => reverse_shell::simulate_reverse_shell(),
-            Commands::Ransomware {} => test_ransomware(),
             Commands::Rootkit {} => simulate_rootkit(),
             Commands::DllHijacking {} => {
                 if let Err(e) = dll_hijacking_c::compile_c_to_dll() {
@@ -106,11 +101,6 @@ fn main() {
 fn test_buffer_overflow() {
     println!("Testing buffer overflow vulnerability...");
     overflow::overflow_server(); // Call the function from the overflow module
-}
-
-fn test_ransomware() {
-    println!("Testing ransomware behavior...");
-    // Add the logic for ransomware test here
 }
 
 fn simulate_rootkit() {
