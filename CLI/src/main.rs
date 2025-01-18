@@ -6,9 +6,9 @@ mod dll_hijacking_c;
 mod phishing;
 mod decrypt;
 mod port_scanner;
-mod decrypt;
 
 use std::process::Command;
+
 
 #[derive(Parser)]
 #[command(name = "vulnerability_tester")]
@@ -40,7 +40,6 @@ enum Commands {
     /// Decrypt the Documents folder
     DecryptDocuments {},
 }
-
 fn main() {
     let cli = Cli::parse();
 
