@@ -1,0 +1,1 @@
+/home/diogo/Bankai/CLI/target/debug/CLI_Test: /home/diogo/Bankai/CLI/src/decrypt.rs /home/diogo/Bankai/CLI/src/dllhijackingC.rs /home/diogo/Bankai/CLI/src/main.rs /home/diogo/Bankai/CLI/src/overflow.rs /home/diogo/Bankai/CLI/src/phishing.rs /home/diogo/Bankai/CLI/src/reverseShellCon.rs

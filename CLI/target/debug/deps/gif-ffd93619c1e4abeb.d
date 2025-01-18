@@ -1,0 +1,12 @@
+/home/diogo/Bankai/CLI/target/debug/deps/libgif-ffd93619c1e4abeb.rmeta: /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/lib.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/traits.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/common.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/reader/mod.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/reader/decoder.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/encoder.rs
+
+/home/diogo/Bankai/CLI/target/debug/deps/libgif-ffd93619c1e4abeb.rlib: /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/lib.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/traits.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/common.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/reader/mod.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/reader/decoder.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/encoder.rs
+
+/home/diogo/Bankai/CLI/target/debug/deps/gif-ffd93619c1e4abeb.d: /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/lib.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/traits.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/common.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/reader/mod.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/reader/decoder.rs /home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/encoder.rs
+
+/home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/lib.rs:
+/home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/traits.rs:
+/home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/common.rs:
+/home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/reader/mod.rs:
+/home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/reader/decoder.rs:
+/home/diogo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gif-0.10.3/src/encoder.rs:
