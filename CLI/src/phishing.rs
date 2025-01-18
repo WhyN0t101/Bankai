@@ -3,7 +3,7 @@ use qrcode::render::svg;
 use std::fs::File;
 use std::io::{self, Write};
 
-pub fn generateEmail() {
+pub fn generate_email() {
     // Get user inputs for dynamic variables
     let subject = "Your Devices Have Been Compromised - Immediate Action Required";
     let body_template = "Dear User,
