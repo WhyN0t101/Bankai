@@ -4,6 +4,7 @@ mod overflow;
 mod reverse_shell;
 mod dll_hijacking_c;
 mod phishing;
+mod decrypt;
 mod port_scanner;
 mod decrypt;
 
@@ -57,8 +58,8 @@ fn main() {
             println!("1. Buffer Overflow        2. Reverse Shell");
             println!("3. Ransomware             4. Rootkit");
             println!("5. Generate DLL           6. Phishing");
-            println!("7. Port Scanner           8. Decrypt Documents");
-            println!("9. Exit");
+            println!("7. Decrypt                8. Port Scanner");
+            println!("9. Something              10. Exit");
             println!();
 
             print!("Enter the number of your choice: ");
