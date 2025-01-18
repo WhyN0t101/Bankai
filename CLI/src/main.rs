@@ -1,10 +1,14 @@
 use clap::{Parser, Subcommand};
 use std::io::{self, Write}; // For input and output
 mod overflow;
-mod reverseShellCon;
-mod dllhijackingC;
+mod reverse_shell;
+mod dll_hijacking_c;
 mod phishing;
+<<<<<<< HEAD
 mod decrypt;
+=======
+mod port_scanner;
+>>>>>>> 000af7d3d6af1280cee96970a63d8815e5fb6325
 use std::process::Command;
 
 #[derive(Parser)]
@@ -52,7 +56,8 @@ fn main() {
             println!("1. Buffer Overflow        2. Reverse Shell");
             println!("3. Ransomware             4. Rootkit");
             println!("5. Generate DLL           6. Phishing");
-            println!("7. Decrypt                8. Exit");
+            println!("7. Decrypt                8. Port Scanner");
+            println!("9. Something              10. Exit");
             println!();
 
             print!("Enter the number of your choice: ");
@@ -63,10 +68,10 @@ fn main() {
 
             match choice.trim() {
                 "1" => test_buffer_overflow(),
-                "2" => simulate_reverse_shell(),
+                "2" => reverse_shell::simulate_reverse_shell(),
                 "3" => test_ransomware(),
                 "4" => simulate_rootkit(),
-                "5" => match dllhijackingC::compile_c_to_dll() {
+                "5" => match dll_hijacking_c::compile_c_to_dll() {
 			Ok(_) => println!("DLL compiled successfully."),
 			Err(e) => eprintln!("Compilation error: {}", e),
 		       },
@@ -75,7 +80,8 @@ fn main() {
 			Ok(_) => println!("Decrypt EXE compiled successfully."),
 			Err(e) => eprintln!("Compilation error: {}", e),
 		       },
-                "8" => {
+        	"8" => port_scanner::port_scanner(),
+                "10" => {
                     println!("Exiting...");
                     break;
                 }
@@ -86,11 +92,11 @@ fn main() {
         // Handle single command directly if passed from the command line (non-interactive mode)
         match cli.command.unwrap() {
             Commands::BufferOverflow {} => test_buffer_overflow(),
-            Commands::ReverseShell {} => simulate_reverse_shell(),
+            Commands::ReverseShell {} => reverse_shell::simulate_reverse_shell(),
             Commands::Ransomware {} => test_ransomware(),
             Commands::Rootkit {} => simulate_rootkit(),
             Commands::DllHijacking {} => {
-                if let Err(e) = dllhijackingC::compile_c_to_dll() {
+                if let Err(e) = dll_hijacking_c::compile_c_to_dll() {
                     eprintln!("Compilation error: {}", e);
                 }
             },
@@ -100,16 +106,11 @@ fn main() {
 
 fn test_buffer_overflow() {
     println!("Testing buffer overflow vulnerability...");
-    overflow::test(); // Call the function from the overflow module
+    overflow::overflow_server(); // Call the function from the overflow module
 }
 
-fn simulate_reverse_shell() {
-    println!("Simulating reverse shell attack...");
-    match reverseShellCon::start_reverse_shell_server() {
-        Ok(_) => println!("Reverse shell session ended."),
-        Err(e) => eprintln!("Error: {}", e),
-    }
-}
+
+
 
 fn test_ransomware() {
     println!("Testing ransomware behavior...");
