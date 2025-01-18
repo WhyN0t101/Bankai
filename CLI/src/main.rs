@@ -3,6 +3,7 @@ use std::io::{self, Write}; // For input and output
 mod overflow;
 mod reverseShellCon;
 mod dllhijackingC;
+mod phishing;
 use std::process::Command;
 
 #[derive(Parser)]
@@ -49,7 +50,8 @@ fn main() {
             // Print the options in two columns
             println!("1. Buffer Overflow        2. Reverse Shell");
             println!("3. Ransomware             4. Rootkit");
-            println!("5. Generate DLL           6. Exit");
+            println!("5. Generate DLL           6. Phishing");
+            println!("7. Something              8. Exit");
             println!();
 
             print!("Enter the number of your choice: ");
@@ -67,7 +69,8 @@ fn main() {
 			Ok(_) => println!("DLL compiled successfully."),
 			Err(e) => eprintln!("Compilation error: {}", e),
 		       },
-                "6" => {
+		"6" => phishing::generateEmail(),
+                "8" => {
                     println!("Exiting...");
                     break;
                 }

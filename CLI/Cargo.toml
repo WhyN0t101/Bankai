@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+qrcode = "0.7.0"
+#qrcodegen = "1.8.0"  # For generating QR code images
+#printpdf = "0.5.0"
+#image = "0.25.5"
 clap = { version = "4.0", features = ["derive"] }
 winapi = { version = "0.3", features = ["libloaderapi"] }
 tokio = { version = "1", features = ["full"] }
