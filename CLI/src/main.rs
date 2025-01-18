@@ -62,7 +62,7 @@ fn main() {
 
             match choice.trim() {
                 "1" => test_buffer_overflow(),
-                "2" => simulate_reverse_shell(),
+                "2" => reverseShellCon::simulate_reverse_shell(),
                 "3" => test_ransomware(),
                 "4" => simulate_rootkit(),
                 "5" => match dllhijackingC::compile_c_to_dll() {
@@ -81,7 +81,7 @@ fn main() {
         // Handle single command directly if passed from the command line (non-interactive mode)
         match cli.command.unwrap() {
             Commands::BufferOverflow {} => test_buffer_overflow(),
-            Commands::ReverseShell {} => simulate_reverse_shell(),
+            Commands::ReverseShell {} => reverseShellCon::simulate_reverse_shell(),
             Commands::Ransomware {} => test_ransomware(),
             Commands::Rootkit {} => simulate_rootkit(),
             Commands::DllHijacking {} => {
@@ -98,13 +98,8 @@ fn test_buffer_overflow() {
     overflow::test(); // Call the function from the overflow module
 }
 
-fn simulate_reverse_shell() {
-    println!("Simulating reverse shell attack...");
-    match reverseShellCon::start_reverse_shell_server() {
-        Ok(_) => println!("Reverse shell session ended."),
-        Err(e) => eprintln!("Error: {}", e),
-    }
-}
+
+
 
 fn test_ransomware() {
     println!("Testing ransomware behavior...");

@@ -6,6 +6,7 @@ version = 3
 name = "CLI_Test"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "clap",
  "qrcode",
  "tokio",
@@ -102,6 +103,12 @@ dependencies = [
  "rustc-demangle",
  "windows-targets",
 ]
+
+[[package]]
+name = "base64"
+version = "0.21.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
 name = "bitflags"

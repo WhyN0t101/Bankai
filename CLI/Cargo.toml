@@ -11,6 +11,7 @@ qrcode = "0.7.0"
 clap = { version = "4.0", features = ["derive"] }
 winapi = { version = "0.3", features = ["libloaderapi"] }
 tokio = { version = "1", features = ["full"] }
+base64 = "0.21.0"
 
 
 [modules]
