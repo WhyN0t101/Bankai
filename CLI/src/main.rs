@@ -4,6 +4,7 @@ mod overflow;
 mod reverse_shell;
 mod dll_hijacking_c;
 mod phishing;
+mod port_scanner;
 use std::process::Command;
 
 #[derive(Parser)]
@@ -51,7 +52,7 @@ fn main() {
             println!("1. Buffer Overflow        2. Reverse Shell");
             println!("3. Ransomware             4. Rootkit");
             println!("5. Generate DLL           6. Phishing");
-            println!("7. Something              8. Exit");
+            println!("7. Port Scanner              8. Exit");
             println!();
 
             print!("Enter the number of your choice: ");
@@ -70,6 +71,7 @@ fn main() {
 			Err(e) => eprintln!("Compilation error: {}", e),
 		       },
 		"6" => phishing::generate_email(),
+        "7" => port_scanner::port_scanner(),
                 "8" => {
                     println!("Exiting...");
                     break;
