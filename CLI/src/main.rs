@@ -5,6 +5,7 @@ mod reverse_shell;
 mod dll_hijacking_c;
 mod phishing;
 mod decrypt;
+mod rootkit;
 mod port_scanner;
 
 use std::process::Command;
@@ -53,7 +54,7 @@ fn main() {
 
             // Print the options in two columns
             println!("1. Buffer Overflow        2. Reverse Shell");
-            println!("3. Port Scanner             4. Rootkit (TODO)");
+            println!("3. Port Scanner           4. Rootkit");
             println!("5. Generate DLL           6. Phishing");
             println!("7. Decrypt                8. Exit");
             println!();
@@ -68,7 +69,7 @@ fn main() {
                 "1" => test_buffer_overflow(),
                 "2" => reverse_shell::simulate_reverse_shell(),
                 "3" => port_scanner::port_scanner(),
-                "4" => simulate_rootkit(),
+                "4" => rootkit::rootkit(),
                 "5" => match dll_hijacking_c::compile_c_to_dll() {
                     Ok(_) => println!("DLL compiled successfully."),
                     Err(e) => eprintln!("Compilation error: {}", e),

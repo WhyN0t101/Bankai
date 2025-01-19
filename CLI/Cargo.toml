@@ -10,8 +10,12 @@ qrcode = "0.7.0"
 #image = "0.25.5"
 clap = { version = "4.0", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
-winapi = { version = "0.3", features = ["libloaderapi", "shlobj", "shobjidl_core", "fileapi", "handleapi"] }
+winapi = { version = "0.3", features = ["libloaderapi", "shlobj", "shobjidl_core", "fileapi", "handleapi", "winuser"] }
 base64 = "0.21.0"
+evdev = "0.12.0"  # Only needed for Linux
+device_query = "0.2"
+
+
 
 
 
