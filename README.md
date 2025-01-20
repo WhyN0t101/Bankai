@@ -8,24 +8,7 @@
 
 ```
 
-1 - Define Types of Malware
-
-	- Virus
-	- Worms
-	- Trojans
-	- Ransomware
-	- Adware
-	- Spyware
-	- Rootkits
-	- Botnets - Diogo
-	- Scareware
-	- Malvertising
-	- Fileless Malware
-	- XSS
- 	- Overflow
-
-2 - Create a CLI Option (Various options to choose from like option 3 - Overflow -> Choose PID
-
+Refs:
 	- Botnet - https://www.udemy.com/course/creating-botnet-in-rust/
  	- Botnet - https://medium.com/codex/write-from-simple-to-advanced-socket-programming-with-rust-part-i-cdcf243bc321
   	- Botnet - https://www.imperva.com/learn/application-security/reverse-shell/
@@ -36,4 +19,3 @@
   	- Guide - https://github.com/Whitecat18/Rust-for-Malware-Development
    	- Guide - https://github.com/skerkour/black-hat-rust
 
-3 - Interface / API
