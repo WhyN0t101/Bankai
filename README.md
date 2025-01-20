@@ -8,21 +8,15 @@
 
 ```
 
-1 - Define Types of Malware
+Simple CLI tool to explore some common vulnerabilities
+- Buffer Overflow
+- Reverse Shell
+- Port Scanner
+- Keylogger (rootkit)
+- Dll Hijacking
+- Phishing
+- Decrypt
 
-	- Virus
-	- Worms
-	- Trojans
-	- Ransomware
-	- Adware
-	- Spyware
-	- Rootkits
-	- Botnets - Diogo
-	- Scareware
-	- Malvertising
-	- Fileless Malware
-	- XSS
- 	- Overflow
 
 2 - Create a CLI Option (Various options to choose from like option 3 - Overflow -> Choose PID
 
@@ -36,4 +30,4 @@
   	- Guide - https://github.com/Whitecat18/Rust-for-Malware-Development
    	- Guide - https://github.com/skerkour/black-hat-rust
 
-3 - Interface / API
+- source venv/bin/activate
