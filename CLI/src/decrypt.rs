@@ -46,7 +46,10 @@ fn log_error(file: &mut File, message: &str) {
 #[cfg(target_os = "windows")]
 fn decrypt_documents(log_file: &mut File) -> io::Result<()> {
     let documents_path = get_documents_folder()?;
-    log_error(log_file, &format!("Found Documents folder: {}", documents_path.display()));
+    log_error(
+        log_file,
+        &format!("Found Documents folder: {}", documents_path.display()),
+    );
 
     decrypt_folder(&documents_path, log_file)
 }
@@ -80,19 +83,61 @@ fn decrypt_folder(path: &Path, log_file: &mut File) -> io::Result<()> {
         let entry = entry?;
         let entry_path = entry.path();
 
+        // Skip known system folders
+        if entry_path.file_name().map_or(false, |name| {
+            name == "My Music" || name == "My Pictures" || name == "My Videos"
+        }) {
+            log_error(log_file, &format!(
+                "Skipping system folder: {}",
+                entry_path.display()
+            ));
+            continue;
+        }
+
         if entry_path.is_dir() {
             log_error(log_file, &format!("Found folder: {}", entry_path.display()));
-            decrypt_folder(&entry_path, log_file)?;
+            if let Err(e) = decrypt_folder(&entry_path, log_file) {
+                log_error(
+                    log_file,
+                    &format!(
+                        "Skipping folder {}: {}",
+                        entry_path.display(),
+                        e
+                    ),
+                );
+                continue;
+            }
         } else {
             log_error(log_file, &format!("Decrypting file: {}", entry_path.display()));
-            decrypt_file(&entry_path)?;
+            if let Err(e) = decrypt_file(&entry_path) {
+                log_error(
+                    log_file,
+                    &format!(
+                        "Failed to decrypt file {}: {}",
+                        entry_path.display(),
+                        e
+                    ),
+                );
+                continue;
+            }
         }
     }
     Ok(())
 }
 
+
+
 #[cfg(target_os = "windows")]
 fn decrypt_file(file_path: &Path) -> io::Result<()> {
+    if !file_path.exists() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "File does not exist",
+        ));
+    }
+
+    ensure_writable(file_path)?;
+
     let mut file = File::open(file_path)?;
     let mut contents = Vec::new();
     file.read_to_end(&mut contents)?;
@@ -107,3 +152,14 @@ fn decrypt_file(file_path: &Path) -> io::Result<()> {
 
     Ok(())
 }
+
+#[cfg(target_os = "windows")]
+fn ensure_writable(file_path: &Path) -> io::Result<()> {
+    let metadata = file_path.metadata()?;
+    let mut permissions = metadata.permissions();
+    permissions.set_readonly(false); // Disable read-only to allow writing
+    fs::set_permissions(file_path, permissions)
+}
+
+
+

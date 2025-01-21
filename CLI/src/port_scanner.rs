@@ -27,18 +27,19 @@ pub fn port_scanner() {
             return;
         }
     };
+    
+	print!("Enter the ending port (e.g., 65535): ");
+	io::stdout().flush().unwrap();
+	let mut end_port = String::new();
+	io::stdin().read_line(&mut end_port).unwrap();
+	let end_port: u16 = match end_port.trim().parse() {
+	    Ok(port) if port >= start_port => port,
+	    _ => {
+		eprintln!("Invalid ending port. Please enter a valid port number.");
+		return;
+	    }
+	};
 
-    print!("Enter the ending port (e.g., 65535): ");
-    io::stdout().flush().unwrap();
-    let mut end_port = String::new();
-    io::stdin().read_line(&mut end_port).unwrap();
-    let end_port: u16 = match end_port.trim().parse() {
-        Ok(port) if port >= start_port && port <= 65535 => port,
-        _ => {
-            eprintln!("Invalid ending port. Please enter a valid port number.");
-            return;
-        }
-    };
 
     println!(
         "[+] Scanning ports on {} from {} to {}...",
