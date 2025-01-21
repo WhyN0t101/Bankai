@@ -1,5 +1,6 @@
 use qrcode::QrCode;
-use qrcode::render::svg;
+use qrcode::types::Color;
+use image::{ImageBuffer, Luma};
 use std::fs::File;
 use std::io::{self, Write};
 
@@ -44,7 +45,7 @@ Sincerely,
     );
 
     // Save the email template to a file
-    let file_name = "generated_email.txt";  // You can change the file name as needed
+    let file_name = "generated_email.txt"; // You can change the file name as needed
     if let Err(e) = save_to_file(file_name, &email_template) {
         eprintln!("Failed to write to file: {}", e);
     } else {
@@ -77,9 +78,11 @@ fn generate_email_template(
 
     let qr_code_placeholder = if include_qr && qr_code_url.is_some() {
         let qr_url = qr_code_url.unwrap();
-        let qr = QrCode::new(qr_url).expect("Failed to generate QR code");
-        let qr_code_svg = qr.render::<svg::Color>().build();
-        format!("\n{}\n", qr_code_svg)
+        let qr_code_image_path = save_qr_code_as_image(qr_url).unwrap_or_else(|e| {
+            eprintln!("Failed to save QR code as image: {}", e);
+            "(QR code could not be generated)".to_string()
+        });
+        format!("\n![QR Code]({})\n", qr_code_image_path)
     } else {
         "\n(Scan the QR code provided above.)\n".to_string()
     };
@@ -90,6 +93,40 @@ fn generate_email_template(
     email_template.push_str(&body_with_qr);
 
     email_template
+}
+
+fn save_qr_code_as_image(url: &str) -> io::Result<String> {
+    let qr = QrCode::new(url).expect("Failed to generate QR code");
+    let width = qr.width();
+    let scale = 10; // Scale factor to increase resolution
+    let scaled_width = width * scale;
+
+    let mut image_buffer = ImageBuffer::new(scaled_width as u32, scaled_width as u32);
+
+    for y in 0..width {
+        for x in 0..width {
+            let pixel = match qr[(x, y)] {
+                Color::Dark => Luma([0u8]), // Black pixel
+                Color::Light => Luma([255u8]), // White pixel
+            };
+
+            // Write the scaled pixel to the output image
+            for dy in 0..scale {
+                for dx in 0..scale {
+                    image_buffer.put_pixel(
+                        (x * scale + dx) as u32,
+                        (y * scale + dy) as u32,
+                        pixel,
+                    );
+                }
+            }
+        }
+    }
+
+    let image_path = "qr_code.png";
+    image_buffer.save(image_path).expect("Failed to save QR code image");
+
+    Ok(image_path.to_string())
 }
 
 fn save_to_file(file_name: &str, content: &str) -> io::Result<()> {

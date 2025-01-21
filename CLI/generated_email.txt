@@ -1,0 +1,26 @@
+Subject: Your Devices Have Been Compromised - Immediate Action Required
+
+Dear User,
+
+We have detected unusual activity on your account, and immediate verification is required to avoid suspension. Failure to act within 24 hours will result in restricted access to your account and possible data loss.
+
+To resolve this issue, please scan the QR code below and follow the instructions on the secure webpage:
+
+
+![QR Code](qr_code.png)
+
+(This QR code redirects you to the verification portal.)
+
+Important:
+
+Open your phone's camera or QR code scanner app.
+Scan the QR code to access the secure verification page.
+Follow the instructions to verify your account activity.
+
+This is an automated security measure to protect your data and account integrity. If you do not complete this verification process, we will assume the activity is unauthorized and take necessary action.
+
+Thank you for your immediate attention to this matter.
+
+Sincerely,
+teste
+teste@mail.com
