@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use std::io::{self, Write};
-use std::process::{Command};
+use std::process::Command;
 
 mod overflow;
 mod reverse_shell;
@@ -26,19 +26,10 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Test for buffer overflow vulnerability
     BufferOverflow {},
-
-    /// Simulate a reverse shell attack
     ReverseShell {},
-
-    /// Generate a malicious DLL
     DllHijacking {},
-
-    /// Decrypt the Documents folder
     DecryptDocuments {},
-
-    /// Deploy and execute a keylogger
     Keylogger {},
 }
 

