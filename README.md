@@ -1,102 +1,88 @@
+# Bankai
 
-```
- ____                    _              _ 
-| __ )    __ _   _ __   | | __   __ _  (_)
-|  _ \   / _` | | '_ \  | |/ /  / _` | | |
-| |_) | | (_| | | | | | |   <  | (_| | | |
-|____/   \__,_| |_| |_| |_|\_\  \__,_| |_|
+A suite of offensive-security tools built for learning: a Rust CLI of individual
+attack techniques, a Flask collector for the keylogger, and a deliberately
+vulnerable TCP service to practise against. Built by Diogo Andrade and Tiago Pereira.
 
-```
+> **For authorised testing and education only.** Several of these tools are live
+> attack techniques and one target service is intentionally vulnerable. Run them
+> only on machines you own or have written permission to test, on an isolated
+> network. See [SECURITY.md](SECURITY.md).
 
-## Overview
-Bankai is a comprehensive cybersecurity project that includes a suite of tools designed for penetration testing, system analysis, and educational purposes. The project demonstrates various techniques including vulnerability exploitation, network traffic analysis, and secure code evaluation. It aims to raise awareness and understanding of cybersecurity threats and countermeasures.
+## Repository layout
 
----
+| Path | Role |
+|------|------|
+| `CLI/` | Rust command-line tool; each technique is a module in `CLI/src/` |
+| `Server/` | `server.py`: Flask endpoint that receives and stores keylogger output |
+| `VulnerableCode/` | `VulnServerRevOver.py`: an intentionally vulnerable TCP service, the practice target for the buffer-overflow and reverse-shell work |
+| `LICENSE` | GNU GPL v3 |
 
-## Features and Tools
+## Tools in the CLI
 
-### Reverse Shell
-- **Description:** A tool for establishing a reverse shell connection to a target machine, enabling remote command execution.
+Each is a subcommand or menu entry in `CLI/src/`:
 
-### Phishing Simulation
-- **Description:** Simulates phishing scenarios to educate users on identifying and preventing phishing attacks.
-
-### Wireshark Integration
-- **Description:** Utilities for analyzing network traffic, identifying anomalies, and learning packet-level network behaviors.
-
-### Keylogging
-- **Description:** Demonstrates how keylogging works and highlights its security implications.
-
-### Port Scanning
-- **Description:** Identifies open ports on a target system to assess potential vulnerabilities.
-
-### DLL Hijacking
-- **Description:** Explores DLL hijacking techniques to understand exploitation methods and their mitigation in Windows environments.
-
-### Decryption Utilities
-- **Description:** Tools for decrypting files or strings, illustrating secure and insecure cryptographic practices.
-
-### Buffer Overflow Exploitation
-- **Description:** Simulates buffer overflow attacks to show vulnerabilities in unsafe memory handling.
-
-### Rootkit Development
-- **Description:** Implements basic rootkit functionality to demonstrate stealth techniques and their detection.
-
----
+| Tool | Source | What it does |
+|------|--------|--------------|
+| Buffer Overflow | `overflow.rs` | Sends an overflowing payload at the vulnerable service |
+| Reverse Shell | `reverse_shell.rs` | Opens a reverse shell back to a listener |
+| Port Scanner | `port_scanner.rs` | Scans a host for open TCP ports |
+| Keylogger | `keylogger.rs` | Captures keystrokes; can run in the background and POST to the Flask server |
+| DLL Hijacking | `dll_hijacking_c.rs` | Demonstrates a DLL search-order hijack on Windows |
+| Phishing | `phishing.rs` | Generates a phishing email and a QR code |
+| Decrypt | `decrypt.rs` | File/string decryption utilities |
 
 ## Requirements
 
-### System Requirements
-- **Operating Systems:**
-  - Linux
-  - Windows (for specific tools like DLL hijacking)
-- **Hardware:**
-  - Minimum 4GB RAM
-  - Internet connectivity for remote tools
+- **Rust** (stable, edition 2021) and Cargo — for the CLI
+- **Python 3** with **Flask** — for `Server/server.py`
+- **Windows** for the DLL-hijacking and keylogger tools (the CLI depends on `winapi`); the keylogger's Linux path uses `evdev`
 
-### Software Dependencies
-- **Programming Languages:**
-  - Rust
-  - C
-  - Python
-- **Libraries and Tools:**
-  - Wireshark Development Libraries
-  - Rust and C compilers
-  - Python 3.13
+## Build and run
 
----
+### CLI
 
-## Usage
+```bash
+cd CLI
+cargo build --release
+```
 
-### Educational Purposes
-- Learn about common cybersecurity threats and mitigation techniques.
+Run the interactive menu:
 
-### Penetration Testing
-- Use tools to ethically test and secure systems, provided you have proper authorization.
+```bash
+cargo run --release
+```
 
-### Awareness and Training
-- Simulate attacks and analyze vulnerabilities to improve security awareness.
+Or call a technique directly (see `cargo run -- --help` for the current list):
 
----
+```bash
+cargo run --release -- reverse-shell
+```
 
-## Ethical Considerations
-This project is intended for ethical use only. Always obtain explicit permission before using these tools in any environment. Misuse of these tools can lead to legal consequences and is strictly against the ethos of this project.
+### Keylog collector
 
----
+```bash
+pip install flask
+python Server/server.py
+```
+
+Listens on `0.0.0.0:5000`; received logs are appended to `received_keylog.txt`.
+
+### Vulnerable practice service
+
+```bash
+python VulnerableCode/VulnServerRevOver.py
+```
+
+Listens on `0.0.0.0:9999`. Run it only inside an isolated lab.
+
+## License
+
+GNU General Public License v3.0 — see [LICENSE](LICENSE).
 
 ## References
-	- [Wireshark Documentation](https://www.wireshark.org/docs/)
-	- Rust and C programming resources for understanding secure coding practices.
-	- Botnet - https://www.udemy.com/course/creating-botnet-in-rust/
- 	- Botnet - https://medium.com/codex/write-from-simple-to-advanced-socket-programming-with-rust-part-i-cdcf243bc321
-  	- Botnet - https://www.imperva.com/learn/application-security/reverse-shell/
- 	- RootKit - https://github.com/joaoviictorti/shadow-rs
-  	- RootKit - https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/exploring-an-experimental-windows-kernel-rootkit-in-rust/
-	- RootKit - https://github.com/memN0ps/eagle-rs
- 	- Ransomware - https://github.com/cdong1012/Rust-Ransomware
-  	- Guide - https://github.com/Whitecat18/Rust-for-Malware-Development
-   	- Guide - https://github.com/skerkour/black-hat-rust
 
-
-
-
+- [Wireshark documentation](https://www.wireshark.org/docs/)
+- Reverse shells — <https://www.imperva.com/learn/application-security/reverse-shell/>
+- Rust for malware development — <https://github.com/Whitecat18/Rust-for-Malware-Development>
+- Black Hat Rust — <https://github.com/skerkour/black-hat-rust>

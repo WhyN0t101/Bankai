@@ -1,1 +1,12 @@
 venv/
+__pycache__/
+*.pyc
+
+# Rust build output
+CLI/target/
+
+# Tool-generated artifacts and third-party binaries
+CLI/generated_email.txt
+CLI/qr_code.png
+CLI/airpcap.dll
+received_keylog.txt
